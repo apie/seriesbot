@@ -1,0 +1,5 @@
+*.conf
+*.db
+config.py
+__pycache__
+TODO
