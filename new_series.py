@@ -71,7 +71,7 @@ def get_new_eps():
   current_shows = get_shows_from_db()
   new_shows = update_show_list(get_followed_shows())
   save_in_db(new_shows)
-  new_eps = {k: dict(show_info=v, ep_info=get_ep_info(v['latest_ep'])) for k, v in new_shows.items() if v['latest_ep'] != current_shows[k]['latest_ep']}
+  new_eps = {k: dict(show_info=v, ep_info=get_ep_info(v['latest_ep'])) for k, v in new_shows.items() if v['latest_ep'] != current_shows.get(k, {}).get('latest_ep')}
   if new_eps:
     return new_eps
   return {}
