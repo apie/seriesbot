@@ -39,9 +39,6 @@ def update_show_list(shows):
     if resp_j['status'] == 'Ended':
       shows[show] = None
     else:
-      shows[show]['netflix'] = False
-      if resp_j['webChannel']:
-        shows[show]['netflix'] = resp_j['webChannel']['id'] == 1
       shows[show]['latest_ep'] = resp_j['_links']['previousepisode']['href']
   return {k: v for k, v in shows.items() if v is not None}
 
