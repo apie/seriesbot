@@ -1,15 +1,12 @@
 #!/usr/bin/env python3
 # Get new episodes for followed series
 
-import os
 import requests
 import re
 from lxml import html
-from pydblite import Base
 
 import config
-
-SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
+import db_logic
 
 PROFILE_PAGE='https://www.tvmaze.com/users/{user_id}/{user_name}/followed'.format(
   user_id=config.TVMAZE_USER_ID,
@@ -17,27 +14,6 @@ PROFILE_PAGE='https://www.tvmaze.com/users/{user_id}/{user_name}/followed'.forma
 )
 SHOW_PAGE='http://api.tvmaze.com/shows/{id}'
 
-def get_shows_from_db():
-  db = Base(os.path.join(SCRIPT_DIR, 'series.db'))
-  db.create('show', 'name', 'latest_ep', mode="open")
-  shows = {}
-  for rec in db:
-    shows[rec['show']] = {
-      'name': rec['name'],
-      'latest_ep': rec['latest_ep'],
-    }
-  return shows
-
-def save_in_db(shows):
-  db = Base(os.path.join(SCRIPT_DIR, 'series.db'))
-  db.create('show', 'name', 'latest_ep', mode="open")
-  for show_id, value in shows.items():
-    rec = db("show") == show_id
-    if rec:
-      db.update(rec, name=value.get('name'), latest_ep=value.get('latest_ep'))
-    else: 
-      db.insert(show=show_id, name=value.get('name'), latest_ep=value.get('latest_ep'))
-  db.commit()
 
 def get_followed_shows():
   response = requests.get(PROFILE_PAGE)
@@ -63,14 +39,17 @@ def update_show_list(shows):
     if resp_j['status'] == 'Ended':
       shows[show] = None
     else:
+      shows[show]['netflix'] = False
+      if resp_j['webChannel']:
+        shows[show]['netflix'] = resp_j['webChannel']['id'] == 1
       shows[show]['latest_ep'] = resp_j['_links']['previousepisode']['href']
   return {k: v for k, v in shows.items() if v is not None}
 
 
 def get_new_eps():
-  current_shows = get_shows_from_db()
+  current_shows = db_logic.get_shows_from_db()
   new_shows = update_show_list(get_followed_shows())
-  save_in_db(new_shows)
+  db_logic.save_shows_in_db(new_shows)
   new_eps = {k: dict(show_info=v, ep_info=get_ep_info(v['latest_ep'])) for k, v in new_shows.items() if v['latest_ep'] != current_shows.get(k, {}).get('latest_ep')}
   if new_eps:
     return new_eps
