@@ -1,4 +1,5 @@
 *.conf
+*_conf.py
 *.db
 config.py
 __pycache__
