@@ -25,9 +25,9 @@ def save_shows_in_db(shows):
   db = open_db()
   for show_id, value in shows.items():
     rec = db("show") == show_id
-    if rec:
-      db.update(rec, name=value.get('name'), latest_ep=value.get('latest_ep'), netflix=value.get('netflix'))
-    else: 
-      db.insert(show=show_id, name=value.get('name'), latest_ep=value.get('latest_ep'), netflix=value.get('netflix'))
+    if not rec:
+      rec_id = db.insert(show=show_id)
+      rec = db[rec_id]
+    db.update(rec, name=value.get('name'), latest_ep=value.get('latest_ep'), netflix=value.get('netflix'))
   db.commit()
 
