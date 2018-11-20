@@ -58,13 +58,15 @@ def get_ep_info(ep_url):
     raise Exception('Unable to get episode page: status {}'.format(response.status_code))
   return response.json()
  
+def print_ep(season, episode):
+  return 'S{season:02}E{episode:02}'.format(season=season, episode=episode)
+
 def print_new_eps():
   for show_id, info in sorted(get_new_eps().items(), key=lambda kv: kv[1]['ep_info']['airdate']):
-    print('{ep_date}: {show_name} {season}x{episode}: {ep_name}'.format(
+    print('{ep_date}: {show_name} {ep}: {ep_name}'.format(
       ep_date=info['ep_info']['airdate'],
       show_name=info['show_info']['name'],
-      season=info['ep_info']['season'],
-      episode=info['ep_info']['number'],
+      ep=print_ep(season=info['ep_info']['season'], episode=info['ep_info']['number']),
       ep_name=info['ep_info']['name'],
     ))
     
