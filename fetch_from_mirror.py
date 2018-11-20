@@ -1,7 +1,5 @@
 #/usr/bin/env python3
 import os
-import subprocess
-
 import requests
 from lxml import html
 from urllib.parse import urljoin
@@ -22,14 +20,6 @@ def is_downloadable(url, auth=None):
     if 'html' in content_type.lower():
         return False
     return True
-
-
-subprocess.check_output('./{}'.format(settings.MOUNT_SCRIPT))
-if not os.path.ismount(settings.MOUNT_PATH):
-  raise Exception("Not mounted")
-if os.path.exists(os.path.join(settings.MOUNT_PATH, settings.UNWANTED_DIRECTORY_IN_MOUNT_PATH)):
-  raise Exception("Mounted the wrong remote")
-
 
 ep_names = []
 for show_id, info in get_new_eps().items(): # TODO ask for un-downloaded eps
@@ -69,7 +59,4 @@ for ep_name in ep_names:
       ep_file.write(ep_href_response.content)
     print('Downloaded: '+ep_filename)
     #TODO save in db if file was downloaded or not
-
-
-subprocess.call('sync')
 
