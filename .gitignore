@@ -1,6 +1,7 @@
 *.conf
 *_conf.py
 *.db
+*.bash
 config.py
 __pycache__
 TODO
