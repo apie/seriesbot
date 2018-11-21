@@ -4,7 +4,8 @@ import requests
 from lxml import html
 from urllib.parse import urljoin
 
-from new_series import get_new_eps, print_ep
+from new_series import print_ep
+import db_logic
 import fetch_from_mirror_conf as settings
 
 def is_downloadable(url, auth=None):
@@ -21,18 +22,21 @@ def is_downloadable(url, auth=None):
         return False
     return True
 
-ep_names = []
-for show_id, info in get_new_eps().items(): # TODO ask for un-downloaded eps
-  ep_name = '{show_name} {ep}'.format(
-    show_name=info['show_info']['name'],
-    ep=print_ep(season=info['ep_info']['season'], episode=info['ep_info']['number']),
+ep_names = {}
+shows = db_logic.get_shows_from_db()
+for ep_id, info in db_logic.get_eps_from_db().items():
+  if info.get('downloaded'):
+    #print('Already downloaded: {}'.format(info['name']))
+    continue
+  ep_names[ep_id] = '{show_name} {ep}'.format(
+    show_name=shows[info['show_id']]['name'],
+    ep=print_ep(season=info['season'], episode=info['number']),
   )
-  ep_names.append(ep_name)
 
 mirror_page_response = requests.get(settings.MIRROR_URL, auth=settings.AUTH)
 mirror_page_response.raise_for_status()
 mirror_page = html.fromstring(mirror_page_response.text)
-for ep_name in ep_names:
+for ep_id, ep_name in ep_names.items():
   # Need to match case insensitive. Use a workaround with translate() for Xpath 1.0
   ep_folder_hrefs = mirror_page.xpath("//a[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'), '{}')]".format(ep_name.replace(' ', '.').lower()))
   if not ep_folder_hrefs:
@@ -53,10 +57,15 @@ for ep_name in ep_names:
     local_file = os.path.join(settings.DOWNLOAD_PATH, ep_filename)
     if os.path.isfile(local_file):
       continue # File exists
-    with open(local_file, 'wb') as ep_file:
-      ep_href_response = requests.get(ep_url, auth=settings.AUTH)
-      ep_href_response.raise_for_status()
-      ep_file.write(ep_href_response.content)
+    try:
+      with open(local_file, 'wb') as ep_file:
+        print('Downloading: '+ep_filename)
+        ep_href_response = requests.get(ep_url, auth=settings.AUTH)
+        ep_href_response.raise_for_status()
+        ep_file.write(ep_href_response.content)
+    except:
+      os.remove(local_file)
+      raise
     print('Downloaded: '+ep_filename)
-    #TODO save in db if file was downloaded or not
+    db_logic.mark_ep_as_downloaded(ep_id)
 
