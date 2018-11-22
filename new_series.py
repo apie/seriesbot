@@ -71,8 +71,11 @@ def get_ep_info(ep_id):
     raise Exception('Unable to get episode page: status {}'.format(response.status_code))
   return response.json()
  
-def print_ep(season, episode):
-  return 'S{season:02}E{episode:02}'.format(season=season, episode=episode)
+def print_ep(season, episode, v=1):
+  if v == 1:
+    return 'S{season:02}E{episode:02}'.format(season=season, episode=episode)
+  if v == 2:
+    return '{season:02}x{episode:02}'.format(season=season, episode=episode)
 
 def print_new_eps():
   for show_id, info in sorted(get_new_eps().items(), key=lambda kv: kv[1]['ep_info']['airdate']):
