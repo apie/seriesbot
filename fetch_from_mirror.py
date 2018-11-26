@@ -1,12 +1,23 @@
 #/usr/bin/env python3
 import os
 import requests
+import subprocess
+import shlex
 from lxml import html
 from urllib.parse import urljoin
 
 from new_series import print_ep
 import db_logic
 import fetch_from_mirror_conf as settings
+
+def get_sub(filename):
+    subprocess.run(
+      shlex.split('{addic7ed_cli} search -bb -i -l en {filename}'.format(
+        addic7ed_cli=settings.ADDIC7ED_CLI_PATH,
+        filename=filename)
+      ),
+    )
+#      stdout=subprocess.DEVNULL)
 
 def is_downloadable(url, auth=None):
     """
@@ -40,6 +51,7 @@ def download_ep(ep_url):
       raise
     print('Downloaded: '+ep_filename)
     db_logic.mark_ep_as_downloaded(ep_id)
+    get_sub(local_file)
 
 ep_names = {}
 shows = db_logic.get_shows_from_db()
