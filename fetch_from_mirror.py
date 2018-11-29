@@ -88,8 +88,7 @@ for ep_id, ep_name in ep_names.items():
   if not ep_folder_hrefs:
     continue
   # If multiple matches are there for 1 ep, take the first match
-  if len(ep_folder_hrefs) > 1:
-    ep_folder_href = ep_folder_hrefs[0]
+  ep_folder_href = ep_folder_hrefs[0]
   ep_folder_url = urljoin(current_url, ep_folder_href.attrib['href'])
   if is_downloadable(ep_folder_url, settings.AUTH):
       # File. Download it
