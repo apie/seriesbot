@@ -1,23 +1,14 @@
 #/usr/bin/env python3
 import os
 import requests
-import subprocess
-import shlex
 from lxml import html
 from urllib.parse import urljoin
 
 from new_series import print_ep
+from get_subs import get_sub
 import db_logic
 import fetch_from_mirror_conf as settings
 
-def get_sub(filename):
-    subprocess.run(
-      shlex.split('{addic7ed_cli} search -bb -i -l en {filename}'.format(
-        addic7ed_cli=settings.ADDIC7ED_CLI_PATH,
-        filename=filename)
-      ),
-    )
-#      stdout=subprocess.DEVNULL)
 
 def is_downloadable(url, auth=None):
     """
