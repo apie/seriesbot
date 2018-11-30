@@ -18,6 +18,7 @@ def get_sub(filename):
         addic7ed_cli=settings.ADDIC7ED_CLI_PATH,
         filename=filename)
       ),
+      cwd=settings.DOWNLOAD_PATH,
     )
 #      stdout=subprocess.DEVNULL)
 
