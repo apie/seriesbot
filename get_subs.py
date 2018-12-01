@@ -19,8 +19,8 @@ def get_sub(filename):
         filename=filename)
       ),
       cwd=settings.DOWNLOAD_PATH,
+      stdout=subprocess.DEVNULL,
     )
-#      stdout=subprocess.DEVNULL)
 
 if __name__ == '__main__':
     get_all_missing_subs(settings.DOWNLOAD_PATH)
