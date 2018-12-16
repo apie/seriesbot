@@ -33,7 +33,7 @@ def download_ep(ep_url):
       return # File exists
     try:
       with open(local_file, 'wb') as ep_file:
-        print('Downloading: '+ep_filename)
+        #print('Downloading: '+ep_filename)
         ep_href_response = requests.get(ep_url, auth=settings.AUTH)
         ep_href_response.raise_for_status()
         ep_file.write(ep_href_response.content)
@@ -70,7 +70,7 @@ for ep_id, ep_name in ep_names.items():
   for url, mirror_page in mirror_pages:
     current_url = url
     for ep_name_variant in ep_name['variants']:
-      search_txt = '{show} {ep_name}'.format(show=ep_name['show_name'], ep_name=ep_name_variant).replace(' ','.').lower()
+      search_txt = '{show} {ep_name}'.format(show=ep_name['show_name'], ep_name=ep_name_variant).replace(' ','.').replace("'", '').lower()
       ep_folder_hrefs = mirror_page.xpath("//a[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'), '{}')]".format(search_txt))
       if ep_folder_hrefs:
         break
