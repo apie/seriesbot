@@ -1,8 +1,10 @@
 #/usr/bin/env python3
 import os
 import requests
+import shutil
 from lxml import html
 from urllib.parse import urljoin
+from os.path import splitext
 
 from new_series import print_ep
 from get_subs import get_sub
@@ -15,6 +17,9 @@ def is_downloadable(url, auth=None):
     Does the url contain a downloadable resource
     https://www.codementor.io/aviaryan/downloading-files-from-urls-in-python-77q3bs0un
     """
+    # Ends with an extension
+    if len(splitext(url)[1]) > 0:
+      return True
     h = requests.head(url, allow_redirects=True, auth=auth)
     header = h.headers
     content_type = header.get('content-type')
@@ -32,11 +37,11 @@ def download_ep(ep_url):
     if os.path.isfile(local_file):
       return # File exists
     try:
+      ep_href_response = requests.get(ep_url, auth=settings.AUTH, stream=True)
+      ep_href_response.raise_for_status()
       with open(local_file, 'wb') as ep_file:
         #print('Downloading: '+ep_filename)
-        ep_href_response = requests.get(ep_url, auth=settings.AUTH)
-        ep_href_response.raise_for_status()
-        ep_file.write(ep_href_response.content)
+        shutil.copyfileobj(ep_href_response.raw, ep_file)
     except:
       os.remove(local_file)
       raise
@@ -93,5 +98,6 @@ for ep_id, ep_name in ep_names.items():
   for ep_href in ep_hrefs:
     ep_filename = ep_href.attrib['href']
     ep_url = urljoin(ep_page_response.url, ep_filename)
-    download_ep(ep_url)
+    if is_downloadable(ep_url):
+      download_ep(ep_url)
 
