@@ -46,8 +46,8 @@ def download_ep(ep_url):
       os.remove(local_file)
       raise
     print('Downloaded: '+ep_filename)
-    db_logic.mark_ep_as_downloaded(ep_id)
     get_sub(local_file)
+    return True
 
 def do_fetch():
   ep_names = {}
@@ -93,7 +93,8 @@ def do_fetch():
     ep_folder_url = urljoin(current_url, ep_folder_href.attrib['href'])
     if is_downloadable(ep_folder_url, settings.AUTH):
         # File. Download it
-        download_ep(ep_folder_url)
+        if download_ep(ep_folder_url):
+          db_logic.mark_ep_as_downloaded(ep_id)
         continue
     # Otherwise it is a folder. Open it.
     ep_page_response = requests.get(ep_folder_url, auth=settings.AUTH)
@@ -104,7 +105,8 @@ def do_fetch():
       ep_filename = ep_href.attrib['href']
       ep_url = urljoin(ep_page_response.url, ep_filename)
       if is_downloadable(ep_url):
-        download_ep(ep_url)
+        if download_ep(ep_url):
+          db_logic.mark_ep_as_downloaded(ep_id)
 
 if __name__ == '__main__':
   do_fetch()
