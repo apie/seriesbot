@@ -1,0 +1,4 @@
+addic7ed-cli
+requests
+lxml
+pydblite
