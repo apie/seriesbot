@@ -38,9 +38,11 @@ def update_show_list(shows):
     resp_j = response.json()
     if resp_j['status'] == 'Ended':
       shows[show] = None
-    else:
+    elif 'previousepisode' in resp_j['_links']:
       prev_ep_href = resp_j['_links']['previousepisode']['href']
       shows[show]['latest_ep'] = prev_ep_href.split('/').pop()
+    else:
+      shows[show] = None
   return {k: v for k, v in shows.items() if v is not None}
 
 def save_new_eps(new_eps):
