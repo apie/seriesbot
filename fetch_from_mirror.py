@@ -2,6 +2,7 @@
 import os
 import requests
 import shutil
+import logging
 from lxml import html
 from urllib.parse import urljoin
 from os.path import splitext
@@ -13,6 +14,7 @@ import fetch_from_mirror_conf as settings
 
 
 TIMEOUT = 10
+logger = logging.getLogger(__name__)
 
 def is_downloadable(url, auth=None):
     """
@@ -76,7 +78,7 @@ def do_fetch():
       mirror_page_response = requests.get(mirror_url, auth=settings.AUTH, timeout=TIMEOUT)
       mirror_page_response.raise_for_status()
     except:
-      print('Error getting '+mirror_url)
+      logger.error('Error getting '+mirror_url)
       continue
     mirror_page = html.fromstring(mirror_page_response.text)
     mirror_pages.append((mirror_page_response.url, mirror_page))
