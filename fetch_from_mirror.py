@@ -12,6 +12,8 @@ import db_logic
 import fetch_from_mirror_conf as settings
 
 
+TIMEOUT = 10
+
 def is_downloadable(url, auth=None):
     """
     Does the url contain a downloadable resource
@@ -70,13 +72,18 @@ def do_fetch():
 
   mirror_pages = []
   for mirror_url in settings.MIRROR_URLS:
-    mirror_page_response = requests.get(mirror_url, auth=settings.AUTH)
-    mirror_page_response.raise_for_status()
+    try:
+      mirror_page_response = requests.get(mirror_url, auth=settings.AUTH, timeout=TIMEOUT)
+      mirror_page_response.raise_for_status()
+    except:
+      print('Error getting '+mirror_url)
+      continue
     mirror_page = html.fromstring(mirror_page_response.text)
     mirror_pages.append((mirror_page_response.url, mirror_page))
   for ep_id, ep_name in ep_names.items():
     # Need to match case insensitive. Use a workaround with translate() for Xpath 1.0
     current_url = None
+    ep_folder_hrefs = None
     for url, mirror_page in mirror_pages:
       current_url = url
       for ep_name_variant in ep_name['variants']:
@@ -97,7 +104,7 @@ def do_fetch():
           db_logic.mark_ep_as_downloaded(ep_id)
         continue
     # Otherwise it is a folder. Open it.
-    ep_page_response = requests.get(ep_folder_url, auth=settings.AUTH)
+    ep_page_response = requests.get(ep_folder_url, auth=settings.AUTH, timeout=TIMEOUT)
     ep_page_response.raise_for_status()
     ep_page = html.fromstring(ep_page_response.text)
     ep_hrefs = ep_page.xpath("//a[text() != '' and text() !='Name' and text() != 'Last modified' and text() !='Parent Directory' and text() != 'Show page in text format']")
