@@ -34,9 +34,11 @@ def save_shows_in_db(shows):
     db.commit()
 
 
-def get_eps_from_db():
+def get_new_eps_from_db():
     eps = {}
     for rec in ep_db:
+        if rec.get('downloaded'):
+            continue
         eps[rec['ep_id']] = {
             'show_id': rec.get('show_id'),
             'season': rec.get('season'),

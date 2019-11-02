@@ -58,10 +58,7 @@ def download_ep(ep_url):
 def do_fetch():
     ep_names = {}
     shows = db_logic.get_shows_from_db()
-    for ep_id, info in db_logic.get_eps_from_db().items():
-        if info.get('downloaded'):
-            # print('Already downloaded: {}'.format(info['name']))
-            continue
+    for ep_id, info in db_logic.get_new_eps_from_db().items():
         ep_names[ep_id] = dict(
             show_name=shows[info['show_id']]['name'],
             variants=[
