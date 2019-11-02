@@ -92,7 +92,7 @@ def print_ep(season, episode, v=1):
 
 
 def print_new_eps():
-    for show_id, info in sorted(get_new_eps().items(), key=lambda kv: kv[1]['ep_info']['airdate']):
+    for info in sorted(get_new_eps().values(), key=lambda v: v['ep_info']['airdate']):
         print('{ep_date}: {show_name} {ep}: {ep_name}'.format(
             ep_date=info['ep_info']['airdate'],
             show_name=info['show_info']['name'],
