@@ -49,15 +49,16 @@ def update_show_list(shows):
 
 
 def save_new_eps(new_eps):
-    eps = {}
-    for show_id, info in new_eps.items():
-        eps[info['ep_info']['id']] = dict(
+    eps = {
+        info['ep_info']['id']: dict(
             show_id=show_id,
             number=info['ep_info']['number'],
             season=info['ep_info']['season'],
             name=info['ep_info']['name'],
             airdate=info['ep_info']['airdate'],
         )
+        for show_id, info in new_eps.items()
+    }
     db_logic.save_eps_in_db(eps)
 
 
@@ -65,8 +66,11 @@ def get_new_eps():
     current_shows = db_logic.get_shows_from_db()
     new_shows = update_show_list(get_followed_shows())
     db_logic.save_shows_in_db(new_shows)
-    new_eps = {k: dict(show_info=v, ep_info=get_ep_info(v['latest_ep'])) for k, v in new_shows.items() if
-               v['latest_ep'] != current_shows.get(k, {}).get('latest_ep')}
+    new_eps = {
+        k: dict(show_info=v, ep_info=get_ep_info(v['latest_ep']))
+        for k, v in new_shows.items()
+        if v['latest_ep'] != current_shows.get(k, {}).get('latest_ep')
+    }
     if new_eps:
         save_new_eps(new_eps)
         return new_eps

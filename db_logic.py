@@ -13,13 +13,12 @@ ep_db.create('ep_id', 'show_id', 'season', 'number', 'name', 'airdate', 'downloa
 
 
 def get_shows_from_db():
-    shows = {}
-    for rec in show_db:
-        shows[rec['show_id']] = {
+    return {
+        rec['show_id']: {
             'name': rec.get('name'),
             'latest_ep': rec.get('latest_ep_id'),
-        }
-    return shows
+        } for rec in show_db
+    }
 
 
 def save_shows_in_db(shows):
@@ -35,19 +34,16 @@ def save_shows_in_db(shows):
 
 
 def get_new_eps_from_db():
-    eps = {}
-    for rec in ep_db:
-        if rec.get('downloaded'):
-            continue
-        eps[rec['ep_id']] = {
+    return {
+        rec['ep_id']: {
             'show_id': rec.get('show_id'),
             'season': rec.get('season'),
             'number': rec.get('number'),
             'name': rec.get('name'),
             'airdate': rec.get('airdate'),
             'downloaded': rec.get('downloaded'),
-        }
-    return eps
+        } for rec in ep_db if not rec.get('downloaded')
+    }
 
 
 def save_eps_in_db(eps):
