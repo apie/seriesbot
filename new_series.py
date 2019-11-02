@@ -17,7 +17,7 @@ EP_PAGE = 'http://api.tvmaze.com/episodes/{id}'
 
 
 def get_followed_shows():
-    response = requests.get(PROFILE_PAGE)
+    response = requests.get(PROFILE_PAGE, timeout=5)
     if response.status_code != 200:
         raise Exception('Unable to get profile page: status {}'.format(response.status_code))
 
@@ -34,7 +34,7 @@ def get_followed_shows():
 
 def update_show_list(shows):
     for show in shows.keys():
-        response = requests.get(SHOW_PAGE.format(id=show))
+        response = requests.get(SHOW_PAGE.format(id=show), timeout=5)
         if response.status_code != 200:
             raise Exception('Unable to get show page: status {}'.format(response.status_code))
         resp_j = response.json()
@@ -78,7 +78,7 @@ def get_new_eps():
 
 
 def get_ep_info(ep_id):
-    response = requests.get(EP_PAGE.format(id=ep_id))
+    response = requests.get(EP_PAGE.format(id=ep_id), timeout=5)
     if response.status_code != 200:
         raise Exception('Unable to get episode page: status {}'.format(response.status_code))
     return response.json()
