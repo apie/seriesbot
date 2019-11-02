@@ -14,9 +14,16 @@ PROFILE_PAGE = 'https://www.tvmaze.com/users/{user_id}/{user_name}/followed'.for
 )
 SHOW_PAGE = 'http://api.tvmaze.com/shows/{id}'
 EP_PAGE = 'http://api.tvmaze.com/episodes/{id}'
+FOLLOWED_SHOWS_PAGE = 'http://api.tvmaze.com/v1/user/follows/shows?embed=show'
 
 
 def get_followed_shows():
+    if hasattr(config, 'TVMAZE_API_KEY'):
+        return get_followed_shows_from_api()
+    return get_followed_shows_from_profile_page()
+
+
+def get_followed_shows_from_profile_page():
     response = requests.get(PROFILE_PAGE, timeout=5)
     if response.status_code != 200:
         raise Exception('Unable to get profile page: status {}'.format(response.status_code))
@@ -31,19 +38,39 @@ def get_followed_shows():
     }
 
 
+def get_followed_shows_from_api():
+    response = requests.get(FOLLOWED_SHOWS_PAGE, timeout=5,
+                            auth=(config.TVMAZE_USER_NAME, config.TVMAZE_API_KEY))
+    if response.status_code != 200:
+        raise Exception('Unable to get followed shows page: status {}'.format(response.status_code))
+    return {
+        show['show_id']: {
+            'name': show['_embedded']['show']['name'],
+            'status': show['_embedded']['show']['status'],
+            '_links': {
+                'previousepisode': show['_embedded']['show'].get('previousepisode'),
+            },
+        }
+        for show in response.json()
+    }
+
+
 def update_show_list(shows):
-    for show in shows.keys():
-        response = requests.get(SHOW_PAGE.format(id=show), timeout=5)
-        if response.status_code != 200:
-            raise Exception('Unable to get show page: status {}'.format(response.status_code))
-        resp_j = response.json()
-        if resp_j['status'] == 'Ended':
-            shows[show] = None
-        elif 'previousepisode' in resp_j['_links']:
-            prev_ep_href = resp_j['_links']['previousepisode']['href']
-            shows[show]['latest_ep'] = prev_ep_href.split('/').pop()
+    for show_id, show in shows.items():
+        if 'status' in show:  # already got all the info from the user API
+            resp_j = show
         else:
-            shows[show] = None
+            response = requests.get(SHOW_PAGE.format(id=show_id), timeout=5)
+            if response.status_code != 200:
+                raise Exception('Unable to get show page: status {}'.format(response.status_code))
+            resp_j = response.json()
+        if resp_j['status'] == 'Ended':
+            shows[show_id] = None
+        elif resp_j['_links'].get('previousepisode'):
+            prev_ep_href = resp_j['_links']['previousepisode']['href']
+            shows[show_id]['latest_ep'] = prev_ep_href.split('/').pop()
+        else:
+            shows[show_id] = None
     return {k: v for k, v in shows.items() if v is not None}
 
 
