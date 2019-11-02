@@ -23,13 +23,12 @@ def get_followed_shows():
 
     doc = html.fromstring(response.text)
     shows_a = doc.xpath("//a[contains(@href, '/shows/') and text()!='']")
-    shows = {}
-    for show in shows_a:
-        m = re.search('[0-9]+', show.attrib['href'])
-        shows[m.group(0)] = {
+    return {
+        int(re.search(r'[0-9]+', show.attrib['href']).group(0)): {
             'name': show.text
         }
-    return shows
+        for show in shows_a
+    }
 
 
 def update_show_list(shows):
