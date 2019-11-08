@@ -48,7 +48,7 @@ def get_followed_shows_from_api():
             'name': show['_embedded']['show']['name'],
             'status': show['_embedded']['show']['status'],
             '_links': {
-                'previousepisode': show['_embedded']['show'].get('previousepisode'),
+                'previousepisode': show['_embedded']['show']['_links'].get('previousepisode'),
             },
         }
         for show in response.json()
