@@ -111,6 +111,8 @@ def get_ep_info(ep_id):
 
 
 def print_ep(season, episode, v=1):
+    if not season or not episode:
+      return ''
     if v == 1:
         return 'S{season:02}E{episode:02}'.format(season=season, episode=episode)
     if v == 2:
