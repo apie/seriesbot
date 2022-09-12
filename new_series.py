@@ -119,7 +119,7 @@ def print_ep(season, episode, v=1):
         return '{season:02}x{episode:02}'.format(season=season, episode=episode)
 
 
-def print_new_eps():
+def print_new_eps(print_link=False):
     for info in sorted(get_new_eps().values(), key=lambda v: v['ep_info']['airdate']):
         print('{ep_date}: {show_name} {ep}: {ep_name}'.format(
             ep_date=info['ep_info']['airdate'],
@@ -127,7 +127,10 @@ def print_new_eps():
             ep=print_ep(season=info['ep_info']['season'], episode=info['ep_info']['number']),
             ep_name=info['ep_info']['name'],
         ))
+        if print_link:
+            print(info['ep_info']['url'])
+            print()
 
 
 if __name__ == '__main__':
-    print_new_eps()
+    print_new_eps(print_link=True)
